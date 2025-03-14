@@ -4,11 +4,6 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-variables:
-  containerRegistry: 'myregistry.azurecr.io'
-  imageName: 'springboot-app'
-  tag: '$(Build.BuildId)'
-
 stages:
 - stage: Build
   displayName: Build and Push Docker Image
@@ -51,7 +46,7 @@ stages:
     - task: AzureCLI@2
       displayName: Azure CLI Login
       inputs:
-        azureSubscription: '<AzureServiceConnection>'
+        azureSubscription: 'AzureDevopsConnection'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
@@ -60,15 +55,15 @@ stages:
     - task: AzureCLI@2
       displayName: Deploy to Azure Container Apps
       inputs:
-        azureSubscription: '<AzureServiceConnection>'
+        azureSubscription: 'AzureDevopsConnection'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
           az containerapp create \
             --name $(imageName) \
-            --resource-group $(resourceGroupName) \
-            --environment $(containerAppEnv) \
-            --image $(containerRegistry)/$(imageName):$(tag) \
+            --resource-group sudhaResourceGroup \
+            --environment managedEnvironment-sudhaResourceGr-9f68 \
+            --image sudhaacrrepo/sudhaacrrepo.azurecr.io:54 \
             --target-port 8080 \
             --ingress external \
             --cpu 0.5 \
