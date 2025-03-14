@@ -4,12 +4,21 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+variables:
+  containerRegistry: 'Connect to demo container registry' # Replace with your ACR name
+  imageName: 'my-app-image'                  # Replace with your image name
+  tag: '$(Build.BuildId)'                    # Use the Build ID as the tag
+  containerAppName: 'my-container-app'       # Replace with your desired container app name
+  resourceGroupName: 'AzureDevopsConnection'     # Replace with your resource group name
+  containerEnvName: 'managedEnvironment-sudhaResourceGr-9f68'       # Replace with the Container App environment name
+  location: 'eastus'                         # Replace with your desired Azure region
+
 stages:
 - stage: Build
   displayName: Build and Push Docker Image
   jobs:
   - job: Build
-    displayName: Build and Publish
+    displayName: Build and Publish Docker Image
     steps:
     - task: Maven@3
       displayName: Build Spring Boot Application
@@ -20,47 +29,63 @@ stages:
     - task: Docker@2
       displayName: Build Docker Image
       inputs:
-        command: 'login'
-        containerRegistry: 'Connect to demo container registry'
+        command: 'build'
+        Dockerfile: '**/Dockerfile'          # Path to your Dockerfile
+        containerRegistry: '$(containerRegistry)'
+        imageName: '$(imageName)'
+        tags: '$(tag)'
 
     - task: Docker@2
       displayName: Push Docker Image to ACR
       inputs:
-        containerRegistry: 'Connect to demo container registry'
-        repository: 'sudhaacrrepo.azurecr.io'
-        command: 'build'
-        Dockerfile: '**/Dockerfile'
-    - task: Docker@2
-      displayName: Push Docker Image to ACR
-      inputs:
-        command: push
-        tags: |
-          sudhaacrrepo.azurecr.io/javaapp:latest
+        command: 'push'
+        containerRegistry: '$(containerRegistry)'
+        imageName: '$(imageName)'
+        tags: '$(tag)'
 
 - stage: Deploy
-  displayName: Deploy to Azure Container Apps
+  displayName: Create and Deploy Azure Container App
   jobs:
   - job: Deploy
-    displayName: Deploy Application
+    displayName: Deploy Docker Image to Azure Container App
     steps:
     - task: AzureCLI@2
-      displayName: Azure CLI Login
+      displayName: Create Azure Container App Environment (if not exists)
       inputs:
-        azureSubscription: 'AzureDevopsConnection'
+        azureSubscription: 'AzureDevopsConnection' # Replace with your Azure service connection
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          echo "Logged into Azure using Service Connection"
+          az containerapp env create \
+            --name $(containerEnvName) \
+            --resource-group $(resourceGroupName) \
+            --location $(location)
 
     - task: AzureCLI@2
-      displayName: Deploy to Azure Container Apps
+      displayName: Create Azure Container App
+      inputs:
+        azureSubscription: 'AzureDevopsConnection' # Replace with your Azure service connection
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az containerapp create \
+            --name $(containerAppName) \
+            --resource-group $(resourceGroupName) \
+            --environment $(containerEnvName) \
+            --image $(containerRegistry)/$(imageName):$(tag) \
+            --cpu 0.5 \
+            --memory 1Gi \
+            --ingress external \
+            --target-port 8080
+
+    - task: AzureCLI@2
+      displayName: Deploy Image to Azure Container App
       inputs:
         azureSubscription: 'AzureDevopsConnection'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          inlineScript: |
           az containerapp update \
-            --name testingappcontainer \
-            --resource-group sudhaResourceGroup \
-            --image sudhaacrrepo/sudhaacrrepo.azurecr.io:61
+            --name $(containerAppName) \
+            --resource-group $(resourceGroupName) \
+            --image $(containerRegistry)/$(imageName):$(tag)
