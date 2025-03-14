@@ -62,5 +62,5 @@ stages:
           inlineScript: |
           az containerapp update \
             --name testingappcontainer \
-            --resource-group testingappcontainer \
+            --resource-group sudhaResourceGroup \
             --image sudhaacrrepo/sudhaacrrepo.azurecr.io:61
