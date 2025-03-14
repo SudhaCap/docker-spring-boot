@@ -10,6 +10,7 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
+
 - task: Maven@3
   inputs:
     mavenPomFile: 'pom.xml'
@@ -37,3 +38,26 @@ steps:
     command: push
     tags: |
       sudhaacrrepo.azurecr.io/javaapp:latest
+stages:
+- stage: Deploy
+  displayName: Deploy to Azure Container Apps
+  jobs:
+  - job: Deploy
+    steps:
+    - script: |
+        az login --service-principal -u $(azureClientId) -p $(azureClientSecret) --tenant $(azureTenantId)
+      displayName: Azure CLI Login
+
+    - script: |
+        az containerapp create \
+          --name $(imageName) \
+          --resource-group $(resourceGroupName) \
+          --environment $(containerAppEnv) \
+          --image $(containerRegistry)/$(imageName):$(tag) \
+          --target-port 8080 \
+          --ingress external \
+          --cpu 0.5 \
+          --memory 1Gi \
+          --min-replicas 1 \
+          --max-replicas 5
+      displayName: Deploy Container App
