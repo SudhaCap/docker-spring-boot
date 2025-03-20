@@ -61,8 +61,7 @@ stages:
             --name $(containerEnvName) \
             --resource-group $(resourceGroupName) \
             --location $(location)
-            --logs-workspace-id <LOG_ANALYTICS_WORKSPACE_ID> \
-            --logs-workspace-key <LOG_ANALYTICS_WORKSPACE_KEY>
+
 
     - task: AzureCLI@2
       displayName: Create Azure Container App
