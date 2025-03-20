@@ -60,7 +60,9 @@ stages:
           az containerapp env create \
             --name $(containerEnvName) \
             --resource-group $(resourceGroupName) \
-            --location $(location)
+            --location $(location) \
+             --logs-workspace-id '520c3406-84e1-46cc-8deb-20e78be8a876' \
+              --logs-workspace-key 'Lbar/dqlIKWtkxylguAo7RlfiJ1XlhQd0ZmXmmbS/6qM9bDO4x74aLfJXIlaeySaw9CUF8j0QFwBjOmQGwCqFw=='
 
 
     - task: AzureCLI@2
