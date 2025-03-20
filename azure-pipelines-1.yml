@@ -52,7 +52,7 @@ stages:
     - task: AzureCLI@2
       displayName: Create Azure Container App Environment (if not exists)
       inputs:
-        azureSubscription: 'test' # Replace with your Azure service connection
+        azureSubscription: 'DevEnvironment' # Replace with your Azure service connection
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
@@ -64,7 +64,7 @@ stages:
     - task: AzureCLI@2
       displayName: Create Azure Container App
       inputs:
-        azureSubscription: 'test' # Replace with your Azure service connection
+        azureSubscription: 'DevEnvironment' # Replace with your Azure service connection
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
@@ -81,7 +81,7 @@ stages:
     - task: AzureCLI@2
       displayName: Deploy Image to Azure Container App
       inputs:
-        azureSubscription: 'test'
+        azureSubscription: 'DevEnvironment'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
