@@ -1,95 +1,33 @@
 trigger:
-- main
+- main  # Trigger pipeline on main branch
 
 pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  containerRegistry: 'ConnectToAzureRegistry' # Replace with your ACR name
-  imageName: 'my-app-image'                  # Replace with your image name
-  tag: '$(Build.BuildId)'                    # Use the Build ID as the tag
-  containerAppName: 'testingappcontainer'       # Replace with your desired container app name
-  resourceGroupName: 'sudhaResourceGroup'     # Replace with your resource group name
-  containerEnvName: 'managedEnvironment-sudhaResourceGr-9f68'       # Replace with the Container App environment name
-  location: 'westeurope '                         # Replace with your desired Azure region
+  containerImage: 'myapp:$(Build.BuildId)'
+  acrName: 'sudhaacrrepo '
+  containerAppName: 'testingappcontainer'
+  resourceGroup: 'sudhaResourceGroup'
 
-stages:
-- stage: Build
-  displayName: Build and Push Docker Image
-  jobs:
-  - job: Build
-    displayName: Build and Publish Docker Image
-    steps:
-    - task: Maven@3
-      displayName: Build Spring Boot Application
-      inputs:
-        mavenPomFile: 'pom.xml'
-        goals: 'clean package'
+steps:
+- task: AzureCLI@2
+  displayName: 'Login to Azure'
+  inputs:
+    azureSubscription: 'Azure subscription 1'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az acr login --name $(acrName)
 
-    - task: Docker@2
-      displayName: Build Docker Image
-      inputs:
-        command: 'build'
-        Dockerfile: '**/Dockerfile'          # Path to your Dockerfile
-        containerRegistry: '$(containerRegistry)'
-        imageName: '$(imageName)'
-        tags: '$(tag)'
-
-    - task: Docker@2
-      displayName: Push Docker Image to ACR
-      inputs:
-        command: 'push'
-        containerRegistry: '$(containerRegistry)'
-        imageName: '$(imageName)'
-        tags: '$(tag)'
-
-- stage: Deploy
-  displayName: Create and Deploy Azure Container App
-  jobs:
-  - job: Deploy
-    displayName: Deploy Docker Image to Azure Container App
-    steps:
-    
-    - task: AzureCLI@2
-      displayName: Create Azure Container App Environment (if not exists)
-      inputs:
-        azureSubscription: 'DevEnvironment' # Replace with your Azure service connection
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          az containerapp env create \
-            --name $(containerEnvName) \
-            --resource-group $(resourceGroupName) \
-            --location $(location) \
-             --logs-workspace-id '520c3406-84e1-46cc-8deb-20e78be8a876' \
-              --logs-workspace-key 'Lbar/dqlIKWtkxylguAo7RlfiJ1XlhQd0ZmXmmbS/6qM9bDO4x74aLfJXIlaeySaw9CUF8j0QFwBjOmQGwCqFw=='
-
-
-    - task: AzureCLI@2
-      displayName: Create Azure Container App
-      inputs:
-        azureSubscription: 'DevEnvironment' # Replace with your Azure service connection
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          az containerapp create \
-            --name $(containerAppName) \
-            --resource-group $(resourceGroupName) \
-            --environment $(containerEnvName) \
-            --image $(containerRegistry)/$(imageName):$(tag) \
-            --cpu 0.5 \
-            --memory 1Gi \
-            --ingress external \
-            --target-port 8080
-
-    - task: AzureCLI@2
-      displayName: Deploy Image to Azure Container App
-      inputs:
-        azureSubscription: 'DevEnvironment'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          az containerapp update \
-            --name $(containerAppName) \
-            --resource-group $(resourceGroupName) \
-            --image $(containerRegistry)/$(imageName):$(tag)
+- task: AzureCLI@2
+  displayName: 'Deploy to Azure Container Apps'
+  inputs:
+    azureSubscription: 'Azure subscription 1'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az containerapp update \
+        --name $(containerAppName) \
+        --resource-group $(resourceGroup) \
+        --image $(acrName).azurecr.io/$(containerImage)
