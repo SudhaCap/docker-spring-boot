@@ -20,6 +20,8 @@ steps:
     inlineScript: |
       az acr login --name $(acrName)
 
+
+
 - task: AzureCLI@2
   displayName: 'Deploy to Azure Container Apps'
   inputs:
@@ -30,4 +32,4 @@ steps:
       az containerapp update \
         --name $(containerAppName) \
         --resource-group $(resourceGroup) \
-        --image $(acrName).azurecr.io/$(imageTag)
+        --image $(acrName).azurecr.io/$(containerImage)
