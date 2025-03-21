@@ -11,7 +11,7 @@ variables:
   containerAppName: 'my-container-app'       # Replace with your desired container app name
   resourceGroupName: 'sudhaResourceGroup'     # Replace with your resource group name
   containerEnvName: 'managedEnvironment-sudhaResourceGr-9f68'       # Replace with the Container App environment name
-  location: 'eastus'                         # Replace with your desired Azure region
+  location: 'westeurope '                         # Replace with your desired Azure region
 
 stages:
 - stage: Build
