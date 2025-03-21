@@ -5,7 +5,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  containerImage: 'myapp:$(Build.BuildId)'
+  containerImage: '78'
   acrName: 'sudhaacrrepo '
   containerAppName: 'testingappcontainer'
   resourceGroup: 'sudhaResourceGroup'
@@ -30,4 +30,4 @@ steps:
       az containerapp update \
         --name $(containerAppName) \
         --resource-group $(resourceGroup) \
-        --image sudhaacrrepo.azurecr.io:78
+        --image $(acrName).azurecr.io/$(imageTag)
