@@ -14,7 +14,7 @@ steps:
 - task: AzureCLI@2
   displayName: 'Login to Azure'
   inputs:
-    azureSubscription: 'Azure subscription 1'
+    azureSubscription: 'TestingContainerApps'
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
@@ -23,7 +23,7 @@ steps:
 - task: AzureCLI@2
   displayName: 'Deploy to Azure Container Apps'
   inputs:
-    azureSubscription: 'Azure subscription 1'
+    azureSubscription: 'TestingContainerApps'
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
