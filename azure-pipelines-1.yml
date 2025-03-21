@@ -30,4 +30,4 @@ steps:
       az containerapp update \
         --name $(containerAppName) \
         --resource-group $(resourceGroup) \
-        --image $(acrName).azurecr.io/$(containerImage)
+        --image sudhaacrrepo.azurecr.io:78
