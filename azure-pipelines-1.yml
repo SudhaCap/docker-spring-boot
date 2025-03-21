@@ -8,7 +8,7 @@ variables:
   containerRegistry: 'ConnectToAzureRegistry' # Replace with your ACR name
   imageName: 'my-app-image'                  # Replace with your image name
   tag: '$(Build.BuildId)'                    # Use the Build ID as the tag
-  containerAppName: 'my-container-app'       # Replace with your desired container app name
+  containerAppName: 'testingappcontainer'       # Replace with your desired container app name
   resourceGroupName: 'sudhaResourceGroup'     # Replace with your resource group name
   containerEnvName: 'managedEnvironment-sudhaResourceGr-9f68'       # Replace with the Container App environment name
   location: 'westeurope '                         # Replace with your desired Azure region
